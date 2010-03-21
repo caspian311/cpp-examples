@@ -1,6 +1,6 @@
 CC=gcc
-EXEC=hello
-SRC=src/hello.c
+EXEC=sayhello
+SRC=src/sayhello.c
 OBJ=$(SRC:.c=.o)
 
 all: test
