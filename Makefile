@@ -3,13 +3,13 @@ EXEC=sayhello
 SRC=src/sayhello.c
 OBJ=$(SRC:.c=.o)
 
-all: test
+all: $(EXEC)
 
 $(OBJ): $(SRC)
 	$(CC) -c $(SRC)
 	mv *.o src
 
-test: $(OBJ)
+$(EXEC): $(OBJ)
 	$(CC) -o $(EXEC) $(OBJ)
 
 clean:
