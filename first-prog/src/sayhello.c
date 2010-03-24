@@ -3,7 +3,7 @@
 
 #include "greeting.h"
 
-main() { 
+int main() { 
 	char name[80];
 	char *text;
 	char greeting[100];
