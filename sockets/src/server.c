@@ -85,15 +85,20 @@ int main(int argc, char *argv[])
 {
    int port = get_port(argc, argv);
    int server_socket = bind_to_port(port);
-   int socket_to_client = wait_for_client(server_socket);
 
-   char buffer[256];
-   read_data_from_client(socket_to_client, buffer);
-   printf("Message from client: %s\n", buffer);
+   while (1)
+   {
+      int socket_to_client = wait_for_client(server_socket);
 
-   send_response_to_client(socket_to_client);
+      char buffer[256];
+      read_data_from_client(socket_to_client, buffer);
+      printf("Message from client: %s\n", buffer);
 
-   close(socket_to_client);
+      send_response_to_client(socket_to_client);
+
+      close(socket_to_client);
+   }
+
    close(server_socket);
 
    return 0; 
