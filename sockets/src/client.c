@@ -27,8 +27,25 @@ int get_port(char *argv[])
    return atoi(argv[2]);
 }
 
-int connect_to_server(struct hostent *server, int port)
+struct hostent* get_server(char *argv[])
 {
+   struct hostent *server = gethostbyname(argv[1]);
+   if (server == NULL) 
+   {
+      fprintf(stderr,"ERROR, no such host\n");
+      exit(0);
+   }
+
+   return server;
+}
+
+int connect_to_server(int argc, char *argv[])
+{
+   validate_input(argc, argv);
+
+   int port = get_port(argv);
+   struct hostent *server = get_server(argv);
+
    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
    if (socket_fd < 0) 
    {
@@ -48,44 +65,45 @@ int connect_to_server(struct hostent *server, int port)
    return socket_fd;
 }
 
-struct hostent *get_server(char *argv[])
+void get_input(char *buffer)
 {
-   struct hostent *server = gethostbyname(argv[1]);
-   if (server == NULL) 
-   {
-      fprintf(stderr,"ERROR, no such host\n");
-      exit(0);
-   }
-
-   return server;
-}
-
-int main(int argc, char *argv[])
-{
-   validate_input(argc, argv);
-
-   int port = get_port(argv);
-   struct hostent *server = get_server(argv);
-
-   int socket_fd = connect_to_server(server, port);
-
    printf("Please enter the message: ");
 
-   char buffer[256];
    bzero(buffer, 256);
    fgets(buffer, 255, stdin);
+}
 
+void write_to_server(int socket_fd, char *buffer)
+{
    int bytes_written_to_server = write(socket_fd, buffer, strlen(buffer));
    if (bytes_written_to_server < 0)
    {
       error("ERROR writing to socket");
    }
+}
+
+void read_response_from_server(int socket_fd, char *buffer)
+{
    bzero(buffer, 256);
    int bytes_from_response = read(socket_fd, buffer, 255);
    if (bytes_from_response < 0)
    {
       error("ERROR reading from socket");
    }
+}
+
+int main(int argc, char *argv[])
+{
+   int socket_fd = connect_to_server(argc, argv);
+
+   char buffer[256];
+
+   get_input(buffer);
+
+   write_to_server(socket_fd, buffer);
+
+   read_response_from_server(socket_fd, buffer);
+
    printf("%s\n", buffer);
 
    close(socket_fd);

@@ -1,5 +1,3 @@
-/* A simple server in the internet domain using TCP
-   The port number is passed as an argument */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,6 +55,10 @@ int wait_for_client(int server_socket)
    if (socket_to_client < 0) 
    {
       error("ERROR on accept");
+   }
+   else
+   {
+      printf("Client connected.\n");
    }
 
    return socket_to_client;
