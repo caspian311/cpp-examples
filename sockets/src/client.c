@@ -13,6 +13,23 @@ void error(const char *msg)
     exit(0);
 }
 
+int get_port(char *port_s)
+{
+   return atoi(port_s);
+}
+
+struct hostent* get_server(char *host)
+{
+   struct hostent *server = gethostbyname(host);
+   if (server == NULL) 
+   {
+      fprintf(stderr,"ERROR, no such host: %s\n", host);
+      exit(0);
+   }
+
+   return server;
+}
+
 void validate_input(int argc, char *argv[])
 {
    if (argc < 3) 
@@ -22,40 +39,30 @@ void validate_input(int argc, char *argv[])
    }
 }
 
-int get_port(char *argv[])
+struct sockaddr_in create_server_address(char *host_s, char *port_s)
 {
-   return atoi(argv[2]);
-}
+   int port = get_port(port_s);
+   struct hostent *server = get_server(host_s);
 
-struct hostent* get_server(char *argv[])
-{
-   struct hostent *server = gethostbyname(argv[1]);
-   if (server == NULL) 
-   {
-      fprintf(stderr,"ERROR, no such host\n");
-      exit(0);
-   }
-
-   return server;
+   struct sockaddr_in server_address;
+   bzero((char *) &server_address, sizeof(server_address));
+   server_address.sin_family = AF_INET;
+   bcopy((char *)server->h_addr, (char *)&server_address.sin_addr.s_addr, server->h_length);
+   server_address.sin_port = htons(port);
+   return server_address;
 }
 
 int connect_to_server(int argc, char *argv[])
 {
    validate_input(argc, argv);
 
-   int port = get_port(argv);
-   struct hostent *server = get_server(argv);
-
    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
    if (socket_fd < 0) 
    {
       error("ERROR opening socket");
    }
-   struct sockaddr_in server_address;
-   bzero((char *) &server_address, sizeof(server_address));
-   server_address.sin_family = AF_INET;
-   bcopy((char *)server->h_addr, (char *)&server_address.sin_addr.s_addr, server->h_length);
-   server_address.sin_port = htons(port);
+
+   struct sockaddr_in server_address = create_server_address(argv[1], argv[2]);
    int connection = connect(socket_fd, (struct sockaddr *) &server_address, sizeof(server_address));
    if (connection < 0)
    {
