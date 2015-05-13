@@ -103,15 +103,15 @@ int main(int argc, char *argv[])
 {
    int socket_fd = connect_to_server(argc, argv);
 
-   char buffer[256];
+   char input[256];
+   get_input(input);
 
-   get_input(buffer);
+   write_to_server(socket_fd, input);
 
-   write_to_server(socket_fd, buffer);
+   char response[256];
+   read_response_from_server(socket_fd, response);
 
-   read_response_from_server(socket_fd, buffer);
-
-   printf("%s\n", buffer);
+   printf("%s\n", response);
 
    close(socket_fd);
 
